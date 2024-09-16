@@ -1,6 +1,6 @@
 from nodes import Nodes
 from state import LottoState
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, END, MessagesState
 from langchain_core.messages import HumanMessage
 
 class Workflow():

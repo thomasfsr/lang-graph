@@ -16,7 +16,7 @@ key = os.getenv('openai_key')
 gpt4mini = "gpt-4o-mini"
 gpt3turbo = "gpt-3.5-turbo"
 
-llm = ChatOpenAI(api_key=key, model=gpt4mini, temperature=0)
+llm = ChatOpenAI(api_key=key, model=gpt3turbo, temperature=0)
 
 class RouteSchema(BaseModel):
     next: str = Field(description="The name of the next worker or 'FINISH'.")
@@ -24,7 +24,7 @@ class RouteSchema(BaseModel):
 class Nodes:
     def __init__(self):
         self.llm = ChatOpenAI(api_key=key, model=gpt4mini, temperature=0)
-        
+
     def supervisor(self):
         members = ["Lotto_Manager", "Coder"]
         system_prompt = (
@@ -41,19 +41,16 @@ class Nodes:
         function_def = {
             "name": "route",
             "description": "Select the next role.",
-            "parameters": {
-                "title": "routeSchema",
-                "type": "object",
-                "properties": {
-                    "next": {
-                        "title": "Next",
-                        "anyOf": [
-                            {"enum": options},
-                        ],
-                    }
-                },
-                "required": ["next"],
-            },
+            "parameters": {"title": "routeSchema",
+                            "type": "object",
+                            "properties": {
+                                            "next": {
+                                                    "title": "Next",
+                                                    "anyOf": [{"enum": options}],
+                                                    }
+                                        },
+                            "required": ["next"],
+                        },
         }
         supervisor_prompt = ChatPromptTemplate.from_messages(
             [
