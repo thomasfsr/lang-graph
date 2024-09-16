@@ -23,7 +23,7 @@ class RouteSchema(BaseModel):
 
 class Nodes:
     def __init__(self):
-        self.llm = ChatOpenAI(api_key=key, model=gpt4mini, temperature=0)
+        self.llm = llm
 
     def supervisor(self):
         members = ["Lotto_Manager", "Coder"]
