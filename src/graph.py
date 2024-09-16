@@ -31,7 +31,6 @@ class Workflow():
     def response(self, query:str):
         return self.app.invoke(input=
         {
-        "messages": [
-            HumanMessage(content=query)]}, 
+        "messages": [query]}, 
             #debug=True
             )
