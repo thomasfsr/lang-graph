@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from typing import List, Type
 import random
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain.tools import BaseTool
 
 ## Schemas:
@@ -16,8 +16,8 @@ class LowerCaseInput(BaseModel):
 ## Tools:
 
 class HistTool(BaseTool):
-    name = 'hist_tool'
-    description="""Plot the histogram of a given array and the number. For instance: 1,2,3"""
+    name:str = 'hist_tool'
+    description: str ="""Plot the histogram of a given array and the number. For instance: 1,2,3"""
     args_schema: Type[BaseModel] = HistInput
 
     def _run(self,
@@ -30,15 +30,15 @@ class HistTool(BaseTool):
         return input_numbers
 
 class RandomTool(BaseTool):
-    name='random_tool'
-    description="""Returns a random number between 0-100. input the word 'random'"""
+    name:str='random_tool'
+    description:str="""Returns a random number between 0-100. input the word 'random'"""
 
     def _run(self) -> int:
         return random.randint(0, 100)
 
 class LowerCaseTool(BaseTool):
-    name = 'lower_case_tool'
-    description= 'Returns the input as all lower case.'
+    name:str = 'lower_case_tool'
+    description:str= 'Returns the input as all lower case.'
     args_schema: Type[BaseModel] = LowerCaseInput
     def _run(self,
              text:str

@@ -1,9 +1,12 @@
 from langchain.agents import AgentExecutor, create_openai_tools_agent
-from langchain_openai import ChatOpenAI
+# from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts.chat import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import BaseMessage, HumanMessage
-from langchain.pydantic_v1 import BaseModel, Field
+
+from pydantic import BaseModel, Field
+
 from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
 
 from tools import RandomTool, HistTool
@@ -12,18 +15,19 @@ import functools
 import os
 
 load_dotenv()
-key = os.getenv('openai_key')
-gpt4mini = "gpt-4o-mini"
-gpt3turbo = "gpt-3.5-turbo"
+key = os.getenv('GROQ_API_KEY')
+# gpt4mini = "gpt-4o-mini"
+# gpt3turbo = "gpt-3.5-turbo"
 
-llm = ChatOpenAI(api_key=key, model=gpt3turbo, temperature=0)
+# llm = ChatOpenAI(api_key=key, model=gpt3turbo, temperature=0)
+llm = ChatGroq(api_key=key, model='llama3-70b-8192', temperature=0)
 
 class RouteSchema(BaseModel):
     next: str = Field(description="The name of the next worker or 'FINISH'.")
 
 class Nodes:
     def __init__(self):
-        self.llm = ChatOpenAI(api_key=key, model=gpt4mini, temperature=0)
+        self.llm = llm
 
     def supervisor(self):
         members = ["Lotto_Manager", "Coder"]
@@ -71,7 +75,7 @@ class Nodes:
             | JsonOutputFunctionsParser()
         )
 
-    def create_agent(self, llm: ChatOpenAI, tools:list, system_prompt: str):
+    def create_agent(self, llm: ChatGroq, tools:list, system_prompt: str):
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
