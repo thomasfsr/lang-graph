@@ -10,6 +10,12 @@ from pydantic import BaseModel, Field
 
 from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
 
+
+
+from langchain_core.agents import AgentAction
+
+
+
 from tools import RandomTool, HistTool
 from dotenv import load_dotenv
 import functools
@@ -21,7 +27,7 @@ key = os.getenv('GROQ_API_KEY')
 # gpt3turbo = "gpt-3.5-turbo"
 
 # llm = ChatOpenAI(api_key=key, model=gpt3turbo, temperature=0)
-llm = ChatGroq(api_key=key, model='llama3-70b-8192', temperature=0)
+llm = ChatGroq(api_key=key, model='mixtral-8x7b-32768', temperature=0)
 
 class RouteSchema(BaseModel):
     next: str = Field(description="The name of the next worker or 'FINISH'.")
@@ -58,7 +64,9 @@ class Nodes:
                         },
         }
         supervisor_prompt = ChatPromptTemplate.from_messages(
-            [system_prompt, MessagesPlaceholder(variable_name="messages"),
+            [
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="messages"),
                 (
                     "system",
                     "Given the conversation above, who should act next?"
@@ -76,11 +84,16 @@ class Nodes:
 
     def create_agent(self, llm: ChatGroq, tools:list, system_prompt: str):
         prompt = ChatPromptTemplate.from_messages(
-            [system_prompt,
+            [
+                (
+                    "system",
+                    system_prompt,
+                ),
                 MessagesPlaceholder(variable_name="messages"),
                 MessagesPlaceholder(variable_name="agent_scratchpad"),
             ]
         )
+
         # agent = create_openai_tools_agent(llm, tools, prompt)
         agent = create_tool_calling_agent(llm, tools, prompt)
         executor = AgentExecutor(agent=agent, tools=tools
@@ -88,9 +101,10 @@ class Nodes:
                                 )
         return executor
 
-    def agent_node(self, state, agent, name):
+    def agent_node(self, state, agent, name: str):
+        # Invoke the agent with the provided state
         result = agent.invoke(state)
-        return {"messages": result["output"]}
+        return {"messages": [HumanMessage(content=result["output"], name=name)]}
     
     def lotto_node(self):
         lotto_agent = self.create_agent(self.llm, tools =[RandomTool()], system_prompt= "You are a senior lotto manager. you run the lotto and get random numbers.")

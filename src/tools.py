@@ -7,7 +7,7 @@ from langchain.tools import BaseTool
 ## Schemas:
 
 class HistInput(BaseModel):
-    input_number:List[int] = Field(description='Should be a list of integer numbers')
+    input_numbers:List[int] = Field(description='Should be a list of integer numbers to be plotted')
     bins:int = Field(description='interger number of the number of bins')
 
 class LowerCaseInput(BaseModel):
@@ -17,7 +17,7 @@ class LowerCaseInput(BaseModel):
 
 class HistTool(BaseTool):
     name:str = 'hist_tool'
-    description: str ="""Plot the histogram of a given array and the number. For instance: 1,2,3"""
+    description: str ="""When it is necessary yo Plot the histogram of a given array and the number."""
     args_schema: Type[BaseModel] = HistInput
 
     def _run(self,
@@ -33,8 +33,11 @@ class RandomTool(BaseTool):
     name:str='random_tool'
     description:str="""Returns a random number between 0-100. input the word 'random'"""
 
-    def _run(self) -> int:
-        return random.randint(0, 100)
+    def _run(self, input:str = None, **kwargs) -> int:
+        if input:
+            return random.randint(0, 100)
+        else:
+            return random.randint(0,100)
 
 class LowerCaseTool(BaseTool):
     name:str = 'lower_case_tool'
