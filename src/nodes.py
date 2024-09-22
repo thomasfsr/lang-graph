@@ -10,31 +10,33 @@ from pydantic import BaseModel, Field
 
 from langchain.output_parsers.openai_functions import JsonOutputFunctionsParser
 
-
+from langchain_openai.chat_models import ChatOpenAI
 
 from langchain_core.agents import AgentAction
 
 
 
-from tools import RandomTool, HistTool
+from tools import RandomTool, Histogram_Tool
 from dotenv import load_dotenv
 import functools
 import os
 
 load_dotenv()
-key = os.getenv('GROQ_API_KEY')
-# gpt4mini = "gpt-4o-mini"
-# gpt3turbo = "gpt-3.5-turbo"
+groq_key = os.getenv('GROQ_API_KEY')
+openai_key = os.getenv('OPENAI_API_KEY')
+gpt3turbo = "gpt-3.5-turbo"
+llama3_groq = 'llama3-8b-8192'
 
-# llm = ChatOpenAI(api_key=key, model=gpt3turbo, temperature=0)
-llm = ChatGroq(api_key=key, model='mixtral-8x7b-32768', temperature=0)
+openai = ChatOpenAI(api_key=openai_key, model=gpt3turbo, temperature=0)
+groq = ChatGroq(api_key=groq_key, model=llama3_groq, temperature=0)
 
 class RouteSchema(BaseModel):
     next: str = Field(description="The name of the next worker or 'FINISH'.")
 
 class Nodes:
     def __init__(self):
-        self.llm = llm
+        self.openai = openai
+        self.groq = groq
 
     def supervisor(self):
         members = ["Lotto_Manager", "Coder"]
@@ -78,11 +80,11 @@ class Nodes:
 
         return (
             supervisor_prompt
-            | self.llm.bind_functions(functions=[function_def], function_call="route")
+            | self.openai.bind_functions(functions=[function_def], function_call="route")
             | JsonOutputFunctionsParser()
         )
 
-    def create_agent(self, llm: ChatGroq, tools:list, system_prompt: str):
+    def create_agent(self, llm, tools:list, system_prompt: str):
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
@@ -107,11 +109,11 @@ class Nodes:
         return {"messages": [HumanMessage(content=result["output"], name=name)]}
     
     def lotto_node(self):
-        lotto_agent = self.create_agent(self.llm, tools =[RandomTool()], system_prompt= "You are a senior lotto manager. you run the lotto and get random numbers.")
+        lotto_agent = self.create_agent(self.groq, tools =[RandomTool()], system_prompt= "You are a senior lotto manager. you run the lotto and get random numbers.")
         lotto_node = functools.partial(self.agent_node, agent=lotto_agent, name= 'Lotto_Manager')
         return lotto_node
 
     def coder_node(self):
-        coder_agent = self.create_agent(self.llm, tools =[HistTool()], system_prompt= "You may generate as list and a number of bins for the tool to plot a histogram.")
+        coder_agent = self.create_agent(self.groq, tools =[Histogram_Tool()], system_prompt= "You may plot a Histogram out of a list and a numbers and the number of bins.")
         coder_node = functools.partial(self.agent_node, agent=coder_agent, name= 'Coder')
         return coder_node 

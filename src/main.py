@@ -2,14 +2,10 @@ from graph import Workflow
 
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
-3
-
-
-
 
 wf = Workflow()
 
-resp = wf.response("""Get 5 random lotto numbers""")
+resp = wf.response("""Get 30 random lotto numbers and plot them in a histogram with 5 bins""")
 # print(resp['messages'][-2].content)
 print(resp)
 

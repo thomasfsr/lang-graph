@@ -10,14 +10,17 @@ class HistInput(BaseModel):
     input_numbers:List[int] = Field(description='Should be a list of integer numbers to be plotted')
     bins:int = Field(description='interger number of the number of bins')
 
+class RandomInput(BaseModel):
+    n_numbers:int = Field(description='Should be the number of random numbers')
+
 class LowerCaseInput(BaseModel):
     text:str = Field(description="A text that will be lower case")
 
 ## Tools:
 
-class HistTool(BaseTool):
+class Histogram_Tool(BaseTool):
     name:str = 'hist_tool'
-    description: str ="""When it is necessary yo Plot the histogram of a given array and the number."""
+    description: str ="""When it is necessary to Plot the histogram of a given array and the number."""
     args_schema: Type[BaseModel] = HistInput
 
     def _run(self,
@@ -31,13 +34,14 @@ class HistTool(BaseTool):
 
 class RandomTool(BaseTool):
     name:str='random_tool'
-    description:str="""Returns a random number between 0-100. input the word 'random'"""
+    description:str="""Returns a list of random numbers between 0-100."""
+    args_schema: Type[BaseModel] = RandomInput
 
-    def _run(self, input:str = None, **kwargs) -> int:
-        if input:
-            return random.randint(0, 100)
+    def _run(self, n_numbers:int = None, **kwargs) -> List[int]:
+        if n_numbers:
+            return [random.randint(0, 100) for _ in range(n_numbers)]
         else:
-            return random.randint(0,100)
+            return 'give me the number of random numbers you need'
 
 class LowerCaseTool(BaseTool):
     name:str = 'lower_case_tool'
